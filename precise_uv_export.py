@@ -7,6 +7,10 @@ bl_info = {
     "category": "Import-Export"
 }
 
+# TODO: Add the ability to shade separate UV islands differently.
+# TODO: Add the ability to shade overlapping UVs a certain colour.
+# TODO: Clean up the horrendous pixel drawing code.
+
 import bpy, os
 
 from bpy.props import StringProperty, BoolProperty, IntVectorProperty
