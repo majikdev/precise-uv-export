@@ -1,6 +1,6 @@
 ## Precise UV Export
 
-This is an add-on I made for Blender, which lets you export a pixel-perfect UV layout to an image.
+This is an add-on I made for Blender, it lets you export a pixel-perfect UV layout to an image. Convenient for making pixelated textures, where the default UV export is not ideal.
 
 ## Installing
 
