@@ -57,8 +57,7 @@ class ExportLayout(bpy.types.Operator):
             bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
         path = bpy.path.ensure_ext(self.filepath, ".png")
-        meshes = list(self.get_meshes_to_export(context))
-        triangles = list(self.get_mesh_triangles(meshes))
+        triangles = list(self.get_mesh_triangles(context))
         self.export_uv_layout(path, triangles)
 
         if edit_mode:
@@ -106,7 +105,7 @@ class ExportLayout(bpy.types.Operator):
                 if dist >= length:
                     break
 
-        def draw_triangle(ax, ay, bx, by, cx, cy):
+        def fill_triangle(ax, ay, bx, by, cx, cy):
             for x in range(x_min, x_max):
                 for y in range(y_min, y_max):
                     dist_a = (x - bx) * (ay - by) - (ax - bx) * (y - by)
@@ -132,7 +131,7 @@ class ExportLayout(bpy.types.Operator):
             draw_line(v2[0], v2[1], v3[0], v3[1])
             draw_line(v3[0], v3[1], v1[0], v1[1])
 
-            draw_triangle(v1[0], v1[1], v2[0], v2[1], v3[0], v3[1])
+            fill_triangle(v1[0], v1[1], v2[0], v2[1], v3[0], v3[1])
 
         try:
             image = bpy.data.images.new("temp", width, height, alpha=True)
@@ -143,32 +142,6 @@ class ExportLayout(bpy.types.Operator):
 
         except:
             pass
-
-    @staticmethod
-    def get_meshes_to_export(context):
-        for mesh in {*context.selected_objects, context.active_object}:
-            if mesh.type != "MESH":
-                continue
-
-            mesh = mesh.data
-
-            if mesh.uv_layers.active is None:
-                continue
-
-            yield mesh
-
-    @staticmethod
-    def get_mesh_triangles(meshes):
-        for mesh in meshes:
-            layer = mesh.uv_layers.active.data
-
-            for polygon in mesh.polygons:
-                start = polygon.loop_start
-                end = start + polygon.loop_total
-                uvs = tuple(uv.uv for uv in layer[start:end])
-
-                for triangle in tessellate_polygon([uvs]):
-                    yield [tuple(uvs[index]) for index in triangle]
 
     @staticmethod
     def get_image_size(context, default):
@@ -184,6 +157,27 @@ class ExportLayout(bpy.types.Operator):
                     width, height = image_w, image_h
 
         return width, height
+
+    @staticmethod
+    def get_mesh_triangles(context):
+        for mesh in {*context.selected_objects, context.active_object}:
+            if mesh.type != "MESH":
+                continue
+
+            mesh = mesh.data
+
+            if mesh.uv_layers.active is None:
+                continue
+
+            layer = mesh.uv_layers.active.data
+
+            for polygon in mesh.polygons:
+                start = polygon.loop_start
+                end = start + polygon.loop_total
+                uvs = tuple(uv.uv for uv in layer[start:end])
+
+                for triangle in tessellate_polygon([uvs]):
+                    yield [tuple(uvs[index]) for index in triangle]
 
 # Register and unregister the addon.
 
