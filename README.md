@@ -13,7 +13,7 @@ Convenient for making low-resolution pixelated textures, where the default UV ex
 
 **How to use:**
 
-1. Open the UV Editor view.
+1. Open the `UV Editor` view.
 2. Open the `UV` drop-down menu.
 3. Press `Export Precise Layout`.
 
