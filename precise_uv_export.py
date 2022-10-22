@@ -35,7 +35,7 @@ class ExportLayout(bpy.types.Operator):
         return mesh is not None and mesh.type == "MESH" and mesh.data.uv_layers
 
     def invoke(self, context, event):
-        self.size = self.get_image_size(context)
+        self.size = self.get_image_size(context, self.size)
         self.filepath = f"{context.active_object.name.replace('.', '_')}.png"
         context.window_manager.fileselect_add(self)
 
@@ -67,30 +67,30 @@ class ExportLayout(bpy.types.Operator):
         return {"FINISHED"}
 
     def export_uv_layout(self, path, triangles):
-        def draw_line(x_begin, y_begin, x_end, y_end):
-            length = sqrt(int(x_end - x_begin) ** 2 + int(y_end - y_begin) ** 2)
-            x_dir, y_dir = (x_end - x_begin) / length, (y_end - y_begin) / length
-            x, y = int(x_begin), int(y_begin)
+        def draw_line(ax, ay, bx, by):
+            length = sqrt(int(bx - ax) ** 2 + int(by - ay) ** 2)
+            x_dir, y_dir = (bx - ax) / length, (by - ay) / length
+            x, y = int(ax), int(ay)
 
             x_delta = 1e30 if x_dir == 0 else abs(1 / x_dir)
             y_delta = 1e30 if y_dir == 0 else abs(1 / y_dir)
 
             if x_dir < 0:
                 x_step = -1
-                x_dist = (x_begin - x) * x_delta
+                x_dist = (ax - x) * x_delta
             else:
                 x_step = 1
-                x_dist = (x - x_begin + 1) * x_delta
+                x_dist = (x - ax + 1) * x_delta
 
             if y_dir < 0:
                 y_step = -1
-                y_dist = (y_begin - y) * y_delta
+                y_dist = (ay - y) * y_delta
             else:
                 y_step = 1
-                y_dist = (y - y_begin + 1) * y_delta
+                y_dist = (y - ay + 1) * y_delta
 
             while True:
-                if x < x_max and y < y_max:
+                if x_min <= x < x_max and y_min <= y < y_max:
                     offset = (y * width + x) * 4
                     pixels[offset:offset + 4] = [1, 1, 1, 1]
 
@@ -106,17 +106,19 @@ class ExportLayout(bpy.types.Operator):
                 if dist >= length:
                     break
 
-        def draw_inside(ax, ay, bx, by, cx, cy, px, py):
-            dist1 = (px - bx) * (ay - by) - (ax - bx) * (py - by)
-            dist2 = (px - cx) * (by - cy) - (bx - cx) * (py - cy)
-            dist3 = (px - ax) * (cy - ay) - (cx - ax) * (py - ay)
+        def draw_triangle(ax, ay, bx, by, cx, cy):
+            for x in range(x_min, x_max):
+                for y in range(y_min, y_max):
+                    dist_a = (x - bx) * (ay - by) - (ax - bx) * (y - by)
+                    dist_b = (x - cx) * (by - cy) - (bx - cx) * (y - cy)
+                    dist_c = (x - ax) * (cy - ay) - (cx - ax) * (y - ay)
 
-            has_negative = dist1 < 0 or dist2 < 0 or dist3 < 0
-            has_positive = dist1 > 0 or dist2 > 0 or dist3 > 0
+                    negative = dist_a < 0 or dist_b < 0 or dist_c < 0
+                    positive = dist_a > 0 or dist_b > 0 or dist_c > 0
 
-            if not (has_negative and has_positive):
-                offset = (y * width + x) * 4
-                pixels[offset:offset + 4] = [1, 1, 1, 1]
+                    if not (negative and positive):
+                        offset = (y * width + x) * 4
+                        pixels[offset:offset + 4] = [1, 1, 1, 1]
 
         width, height = self.size
         pixels = [0, 0, 0, 0] * width * height
@@ -130,9 +132,7 @@ class ExportLayout(bpy.types.Operator):
             draw_line(v2[0], v2[1], v3[0], v3[1])
             draw_line(v3[0], v3[1], v1[0], v1[1])
 
-            for x in range(x_min, x_max):
-                for y in range(y_min, y_max):
-                    draw_inside(v1[0], v1[1], v2[0], v2[1], v3[0], v3[1], x, y)
+            draw_triangle(v1[0], v1[1], v2[0], v2[1], v3[0], v3[1])
 
         try:
             image = bpy.data.images.new("temp", width, height, alpha=True)
@@ -143,20 +143,6 @@ class ExportLayout(bpy.types.Operator):
 
         except:
             pass
-
-    def get_image_size(self, context):
-        width, height = self.size
-
-        if isinstance(context.space_data, bpy.types.SpaceImageEditor):
-            image = context.space_data.image
-
-            if image is not None:
-                ctx_width, ctx_height = context.space_data.image.size
-
-                if ctx_width and ctx_height:
-                    width, height = ctx_width, ctx_height
-
-        return width, height
 
     @staticmethod
     def get_meshes_to_export(context):
@@ -183,6 +169,21 @@ class ExportLayout(bpy.types.Operator):
 
                 for triangle in tessellate_polygon([uvs]):
                     yield [tuple(uvs[index]) for index in triangle]
+
+    @staticmethod
+    def get_image_size(context, default):
+        width, height = default
+
+        if isinstance(context.space_data, bpy.types.SpaceImageEditor):
+            image = context.space_data.image
+
+            if image is not None:
+                image_w, image_h = context.space_data.image.size
+
+                if image_w and image_h:
+                    width, height = image_w, image_h
+
+        return width, height
 
 # Register and unregister the addon.
 
