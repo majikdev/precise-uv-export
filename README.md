@@ -19,3 +19,8 @@ Convenient for making low-resolution pixelated textures, where the default UV ex
 
 The exported image's size defaults to the size of the image in the UV Editor, or 16x16.<br>
 This can be changed during the export.
+
+**Things to add:**
+
+1. Shading separate UV layout islands differently.
+2. Shading pixels with overlapping UVs differently.
