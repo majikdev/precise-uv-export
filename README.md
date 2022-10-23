@@ -22,5 +22,6 @@ This can be changed during the export.
 
 **Things to add:**
 
-1. Shading separate UV layout islands differently.
-2. Shading pixels with overlapping UVs differently.
+1. **For some reason Blender freezes.**
+2. Clean up the horrendous code, a lot.
+3. Shading overlapping UVs differently.
