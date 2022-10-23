@@ -68,16 +68,12 @@ class ExportLayout(bpy.types.Operator):
 
     def export_uv_layout(self, path, triangles):
         def draw_line(ax, ay, bx, by):
-            length = sqrt(int(bx - ax) ** 2 + int(by - ay) ** 2)
-
-            if length == 0:
-                return
-
+            length = sqrt((bx - ax) ** 2 + (by - ay) ** 2)
             x_dir, y_dir = (bx - ax) / length, (by - ay) / length
-            x, y = int(ax), int(ay)
+            x, y, dist = int(ax), int(ay), 0
 
-            x_delta = 1e30 if x_dir == 0 else abs(1 / x_dir)
-            y_delta = 1e30 if y_dir == 0 else abs(1 / y_dir)
+            x_delta = 1e6 if x_dir == 0 else abs(1 / x_dir)
+            y_delta = 1e6 if y_dir == 0 else abs(1 / y_dir)
 
             if x_dir < 0:
                 x_step = -1
@@ -93,7 +89,7 @@ class ExportLayout(bpy.types.Operator):
                 y_step = 1
                 y_dist = (y - ay + 1) * y_delta
 
-            while True:
+            while dist < length:
                 if x_min <= x < x_max and y_min <= y < y_max:
                     offset = (y * width + x) * 4
                     pixels[offset:offset + 4] = get_colour(index)
@@ -106,9 +102,6 @@ class ExportLayout(bpy.types.Operator):
                     y_dist += y_delta
                     y += y_step
                     dist = y_dist - y_delta
-
-                if dist >= length:
-                    break
 
         def fill_poly(ax, ay, bx, by, cx, cy):
             for x in range(x_min, x_max):
