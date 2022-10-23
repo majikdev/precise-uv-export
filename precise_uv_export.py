@@ -11,7 +11,7 @@ import bpy, os
 
 from bpy.props import StringProperty, BoolProperty, IntVectorProperty
 from mathutils.geometry import tessellate_polygon
-from math import ceil, sqrt
+from math import ceil, sqrt, isclose
 
 # Precise UV layout export operator.
 
@@ -142,8 +142,12 @@ class ExportLayout(bpy.types.Operator):
             index = triangle.pop()
             v1, v2, v3 = [(x * width, y * height) for x, y in triangle]
             
-            x_min, x_max = int(min(v1[0], v2[0], v3[0])), ceil(max(v1[0], v2[0], v3[0]))
-            y_min, y_max = int(min(v1[1], v2[1], v3[1])), ceil(max(v1[1], v2[1], v3[1]))
+            x_min, x_max = min(v1[0], v2[0], v3[0]), ceil(max(v1[0], v2[0], v3[0]))
+            y_min, y_max = min(v1[1], v2[1], v3[1]), ceil(max(v1[1], v2[1], v3[1]))
+
+            # Fix an issue caused by floating-point precision.
+            x_min = ceil(x_min) if isclose(x_min, ceil(x_min), rel_tol=1e-06) else int(x_min)
+            y_min = ceil(y_min) if isclose(y_min, ceil(y_min), rel_tol=1e-06) else int(y_min)
 
             draw_line(v1[0], v1[1], v2[0], v2[1])
             draw_line(v2[0], v2[1], v3[0], v3[1])
