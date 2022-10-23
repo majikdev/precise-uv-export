@@ -145,7 +145,7 @@ class ExportLayout(bpy.types.Operator):
             x_min, x_max = min(v1[0], v2[0], v3[0]), ceil(max(v1[0], v2[0], v3[0]))
             y_min, y_max = min(v1[1], v2[1], v3[1]), ceil(max(v1[1], v2[1], v3[1]))
 
-            # Fix an issue caused by floating-point precision.
+            # Fixes an issue caused by floating-point precision.
             x_min = ceil(x_min) if isclose(x_min, ceil(x_min), rel_tol=1e-06) else int(x_min)
             y_min = ceil(y_min) if isclose(y_min, ceil(y_min), rel_tol=1e-06) else int(y_min)
 
