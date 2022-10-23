@@ -16,7 +16,7 @@ from math import ceil, sqrt, isclose
 # Precise UV layout export operator.
 
 class ExportLayout(bpy.types.Operator):
-    """Export a pixel-perfect UV layout as an image"""
+    """Export pixel-perfect UV layouts as images"""
 
     bl_idname = "uv.export_precise_layout"
     bl_label = "Export Precise Layout"
@@ -45,9 +45,6 @@ class ExportLayout(bpy.types.Operator):
         return {"RUNNING_MODAL"}
 
     def check(self, context):
-        if self.filepath.endswith(".png"):
-            self.filepath = self.filepath[:-4]
-
         self.filepath = bpy.path.ensure_ext(self.filepath, ".png")
 
         return True
@@ -132,7 +129,7 @@ class ExportLayout(bpy.types.Operator):
                 return 1, 1, 1, 1
 
             value = 1 - (index % 6) * 0.1
-
+            
             return value, value, value, 1
 
         width, height = self.size
@@ -145,15 +142,14 @@ class ExportLayout(bpy.types.Operator):
             x_min, x_max = min(v1[0], v2[0], v3[0]), ceil(max(v1[0], v2[0], v3[0]))
             y_min, y_max = min(v1[1], v2[1], v3[1]), ceil(max(v1[1], v2[1], v3[1]))
 
-            # Fixes an issue caused by floating-point precision.
-            x_min = ceil(x_min) if isclose(x_min, ceil(x_min), rel_tol=1e-06) else int(x_min)
-            y_min = ceil(y_min) if isclose(y_min, ceil(y_min), rel_tol=1e-06) else int(y_min)
+            x_min = ceil(x_min) if isclose(x_min, ceil(x_min), rel_tol=1e-6) else int(x_min)
+            y_min = ceil(y_min) if isclose(y_min, ceil(y_min), rel_tol=1e-6) else int(y_min)
 
-            draw_line(v1[0], v1[1], v2[0], v2[1])
-            draw_line(v2[0], v2[1], v3[0], v3[1])
-            draw_line(v3[0], v3[1], v1[0], v1[1])
-            
-            fill_poly(v1[0], v1[1], v2[0], v2[1], v3[0], v3[1])
+            draw_line(*v1, *v2)
+            draw_line(*v2, *v3)
+            draw_line(*v3, *v1)
+
+            fill_poly(*v1, *v2, *v3)
 
         try:
             image = bpy.data.images.new("temp", width, height, alpha=True)
