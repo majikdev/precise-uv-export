@@ -28,8 +28,8 @@ class ExportLayout(bpy.types.Operator):
     size: IntVectorProperty(size=2, min=2, max=8192, default=(16, 16), name="Image Size",
                             description="Dimensions of the exported layout image")
 
-    shade_islands: BoolProperty(default=True, name="Shade Islands",
-                                description="Shade separate UV islands differently")
+    #shade_islands: BoolProperty(default=True, name="Shade Islands",
+    #                            description="Shade separate UV islands differently")
 
     @classmethod
     def poll(cls, context):
