@@ -189,7 +189,7 @@ class ExportLayout(bpy.types.Operator):
             islands = []
 
             """for vertex in layer:
-                if vertex not in [uv for isle in islands for uv in isle]:
+                if vertex not in [uv for island in islands for uv in island]:
                     bpy.ops.object.mode_set(mode="EDIT")
                     bpy.ops.uv.select_all(action="DESELECT")
                     bpy.ops.object.mode_set(mode="OBJECT")
