@@ -28,8 +28,8 @@ class ExportLayout(bpy.types.Operator):
     size: IntVectorProperty(size=2, min=2, max=8192, default=(16, 16), name="Image Size",
                             description="Dimensions of the exported layout image")
 
-    #shade_islands: BoolProperty(default=True, name="Shade Islands",
-    #                            description="Shade separate UV islands differently")
+    shade_islands: BoolProperty(default=True, name="Shade Islands",
+                                description="Shade separate UV islands differently")
 
     @classmethod
     def poll(cls, context):
@@ -186,15 +186,15 @@ class ExportLayout(bpy.types.Operator):
     def get_mesh_triangles(meshes):
         for mesh in meshes:
             layer = mesh.uv_layers.active.data
-            """islands = []
+            islands = []
 
-            for v in layer:
-                if v not in [uv for isle in islands for uv in isle]:
+            """for vertex in layer:
+                if vertex not in [uv for isle in islands for uv in isle]:
                     bpy.ops.object.mode_set(mode="EDIT")
                     bpy.ops.uv.select_all(action="DESELECT")
                     bpy.ops.object.mode_set(mode="OBJECT")
 
-                    v.select = True
+                    vertex.select = True
 
                     bpy.ops.object.mode_set(mode="EDIT")
                     bpy.ops.uv.select_linked()
@@ -207,17 +207,24 @@ class ExportLayout(bpy.types.Operator):
             bpy.ops.uv.select_all(action="DESELECT")
             bpy.ops.object.mode_set(mode="OBJECT")"""
 
+            # TODO: For some reason, the above code corrupts the outputted triangles below.
+            # TODO: For some reason, sometimes islands get added even if they're not unique.
+
             for polygon in mesh.polygons:
                 start = polygon.loop_start
                 end = start + polygon.loop_total
                 uvs = tuple(uv.uv for uv in layer[start:end])
                 island_index = 0
 
-                """for i, island in enumerate(islands):
+                for i, island in enumerate(islands):
                     if layer[start] in island:
-                        island_index = i"""
+                        island_index = i
 
                 for triangle in tessellate_polygon([uvs]):
+                    tri = [tuple(uvs[index]) for index in triangle]
+                    v1, v2, v3 = [(x * 16, y * 16) for x, y in tri]
+                    print("Tri:", f"({v1[0]:.2f} {v1[1]:.2f}) ({v2[0]:.2f} {v2[1]:.2f}) ({v3[0]:.2f} {v3[1]:.2f})")
+
                     yield [tuple(uvs[index]) for index in triangle] + [island_index]
 
 # Register and unregister the addon.
