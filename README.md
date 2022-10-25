@@ -19,9 +19,3 @@ Convenient for making low-resolution pixelated textures, where the default UV ex
 
 By default, the exported image takes the size of the image in the UV Editor, or 16x16.<br>
 If you do not wish to use that size, it can be changed during the export.
-
-**Things to add:**
-
-1. **For some reason Blender freezes.**
-2. Clean up the horrendous code, a lot.
-3. Shading overlapping UVs differently.
