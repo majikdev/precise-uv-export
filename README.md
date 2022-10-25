@@ -17,5 +17,7 @@ Convenient for making low-resolution pixelated textures, where the default UV ex
 2. Open the `UV` drop-down menu.
 3. Press `Export Precise Layout`.
 
-By default, the exported image takes the size of the image in the UV Editor, or 16x16.<br>
-If you do not wish to use that size, it can be changed during the export.
+The exported image takes the size of the image in the editor, or 16x16.<br>
+Each island in the UV layout is coloured in a different shade of grey.
+
+*These settings can be changed during the exporting process.*
