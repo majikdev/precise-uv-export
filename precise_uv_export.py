@@ -188,7 +188,11 @@ class ExportLayout(bpy.types.Operator):
             layer = mesh.uv_layers.active.data
             islands = []
 
-            """for vertex in layer:
+            # TODO: Sometimes there are more islands than there should be?
+            # TODO: Sometimes the island_index is calculated incorrectly.
+            #       Pperhaps a vertex resides in more than one island?
+
+            for vertex in layer:
                 if vertex not in [uv for island in islands for uv in island]:
                     bpy.ops.object.mode_set(mode="EDIT")
                     bpy.ops.uv.select_all(action="DESELECT")
@@ -205,10 +209,9 @@ class ExportLayout(bpy.types.Operator):
 
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.uv.select_all(action="DESELECT")
-            bpy.ops.object.mode_set(mode="OBJECT")"""
+            bpy.ops.object.mode_set(mode="OBJECT")
 
-            # TODO: For some reason, the above code corrupts the outputted triangles below.
-            # TODO: For some reason, sometimes islands get added even if they're not unique.
+            layer = mesh.uv_layers.active.data
 
             for polygon in mesh.polygons:
                 start = polygon.loop_start
@@ -221,10 +224,6 @@ class ExportLayout(bpy.types.Operator):
                         island_index = i
 
                 for triangle in tessellate_polygon([uvs]):
-                    tri = [tuple(uvs[index]) for index in triangle]
-                    v1, v2, v3 = [(x * 16, y * 16) for x, y in tri]
-                    print("Tri:", f"({v1[0]:.2f} {v1[1]:.2f}) ({v2[0]:.2f} {v2[1]:.2f}) ({v3[0]:.2f} {v3[1]:.2f})")
-
                     yield [tuple(uvs[index]) for index in triangle] + [island_index]
 
 # Register and unregister the addon.
