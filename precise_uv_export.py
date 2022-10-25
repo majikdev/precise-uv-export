@@ -2,7 +2,7 @@ bl_info = {
     "name": "Precise UV Export",
     "description": "Export pixel-perfect UV layouts as images",
     "author": "majik",
-    "version": (1, 1),
+    "version": (1, 1, 0),
     "blender": (3, 0, 0),
     "category": "Import-Export"
 }
@@ -204,6 +204,7 @@ class ExportLayout(bpy.types.Operator):
                     bpy.ops.uv.select_linked()
                     bpy.ops.object.mode_set(mode="OBJECT")
 
+                    layer = mesh.uv_layers.active.data
                     island = [uv for uv in layer if uv.select]
 
                     if island:
