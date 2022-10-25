@@ -121,7 +121,7 @@ class ExportLayout(bpy.types.Operator):
             if not self.shade_islands:
                 return 1, 1, 1, 1
 
-            value = 1 - (index % 6) * 0.1
+            value = 1 - (index % 5) * 0.125
             
             return value, value, value, 1
 
