@@ -13,7 +13,7 @@ from bpy.props import StringProperty, BoolProperty, IntVectorProperty
 from mathutils.geometry import tessellate_polygon
 from math import ceil, sqrt, isclose
 
-# Precise UV layout export operator.
+# Precise UV export operator.
 
 class ExportLayout(bpy.types.Operator):
     """Export pixel-perfect UV layouts as images"""
@@ -54,7 +54,7 @@ class ExportLayout(bpy.types.Operator):
         edit_mode = mesh.mode == "EDIT"
 
         if edit_mode:
-            bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
+            bpy.ops.object.mode_set(mode="OBJECT")
 
         path = bpy.path.ensure_ext(self.filepath, ".png")
         meshes = list(self.get_meshes_to_export(context))
@@ -62,7 +62,7 @@ class ExportLayout(bpy.types.Operator):
         self.export_uv_layout(path, triangles)
 
         if edit_mode:
-            bpy.ops.object.mode_set(mode="EDIT", toggle=False)
+            bpy.ops.object.mode_set(mode="EDIT")
 
         return {"FINISHED"}
 
@@ -92,7 +92,7 @@ class ExportLayout(bpy.types.Operator):
             while dist < length:
                 if x_min <= x < x_max and y_min <= y < y_max:
                     offset = (y * width + x) * 4
-                    pixels[offset:offset + 4] = get_colour(index)
+                    pixels[offset:offset + 4] = get_colour()
 
                 if x_dist < y_dist:
                     x_dist += x_delta
@@ -115,21 +115,21 @@ class ExportLayout(bpy.types.Operator):
 
                     if not (negative and positive):
                         offset = (y * width + x) * 4
-                        pixels[offset:offset + 4] = get_colour(index)
+                        pixels[offset:offset + 4] = get_colour()
 
-        def get_colour(index):
-            if not self.shade_islands:
-                return 1, 1, 1, 1
+        def get_colour():
+            if self.shade_islands:
+                value = 1 - (island_index % 5) * 0.125
 
-            value = 1 - (index % 5) * 0.125
+                return value, value, value, 1
             
-            return value, value, value, 1
+            return 1, 1, 1, 1
 
         width, height = self.size
         pixels = [0, 0, 0, 0] * width * height
 
         for triangle in triangles:
-            index = triangle.pop()
+            island_index = triangle.pop()
             v1, v2, v3 = [(x * width, y * height) for x, y in triangle]
             
             x_min, x_max = max(min(v1[0], v2[0], v3[0]), 0), min(ceil(max(v1[0], v2[0], v3[0])), width)
@@ -146,9 +146,9 @@ class ExportLayout(bpy.types.Operator):
 
         try:
             image = bpy.data.images.new("temp", width, height, alpha=True)
-            image.filepath = path
-            image.pixels = pixels
+            image.filepath, image.pixels = path, pixels
             image.save()
+
             bpy.data.images.remove(image)
 
         except:
@@ -162,7 +162,7 @@ class ExportLayout(bpy.types.Operator):
             image = context.space_data.image
 
             if image is not None:
-                image_w, image_h = context.space_data.image.size
+                image_w, image_h = image.size
 
                 if image_w and image_h:
                     width, height = image_w, image_h
@@ -190,7 +190,7 @@ class ExportLayout(bpy.types.Operator):
 
             # TODO: Sometimes there are more islands than there should be?
             # TODO: Sometimes the island_index is calculated incorrectly.
-            #       Pperhaps a vertex resides in more than one island?
+            #       Perhaps a vertex resides in more than one island?
 
             for vertex in layer:
                 if vertex not in [uv for island in islands for uv in island]:
@@ -204,7 +204,9 @@ class ExportLayout(bpy.types.Operator):
                     bpy.ops.uv.select_linked()
                     bpy.ops.object.mode_set(mode="OBJECT")
 
-                    if island := [uv for uv in layer if uv.select]:
+                    island = [uv for uv in layer if uv.select]
+
+                    if island:
                         islands.append(island)
 
             bpy.ops.object.mode_set(mode="EDIT")
@@ -224,9 +226,9 @@ class ExportLayout(bpy.types.Operator):
                         island_index = i
 
                 for triangle in tessellate_polygon([uvs]):
-                    yield [tuple(uvs[index]) for index in triangle] + [island_index]
+                    yield [tuple(uvs[i]) for i in triangle] + [island_index]
 
-# Register and unregister the addon.
+# Register and unregister.
 
 def menu_entry(self, context):
     self.layout.operator(ExportLayout.bl_idname)
