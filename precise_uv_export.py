@@ -7,7 +7,7 @@ bl_info = {
     "category": "Import-Export"
 }
 
-import bpy, os
+import bpy, bpy_extras, os
 
 from bpy.props import StringProperty, BoolProperty, IntVectorProperty
 from mathutils.geometry import tessellate_polygon
@@ -186,44 +186,16 @@ class ExportLayout(bpy.types.Operator):
     def get_mesh_triangles(meshes):
         for mesh in meshes:
             layer = mesh.uv_layers.active.data
-            islands = []
+            islands = bpy_extras.mesh_utils.mesh_linked_uv_islands(mesh)
 
-            # TODO: Sometimes there are more islands than there should be?
-            # TODO: Sometimes the island_index is calculated incorrectly.
-            #       Perhaps a vertex resides in more than one island?
-
-            for vertex in layer:
-                if vertex not in [uv for island in islands for uv in island]:
-                    bpy.ops.object.mode_set(mode="EDIT")
-                    bpy.ops.uv.select_all(action="DESELECT")
-                    bpy.ops.object.mode_set(mode="OBJECT")
-
-                    vertex.select = True
-
-                    bpy.ops.object.mode_set(mode="EDIT")
-                    bpy.ops.uv.select_linked()
-                    bpy.ops.object.mode_set(mode="OBJECT")
-
-                    layer = mesh.uv_layers.active.data
-                    island = [uv for uv in layer if uv.select]
-
-                    if island:
-                        islands.append(island)
-
-            bpy.ops.object.mode_set(mode="EDIT")
-            bpy.ops.uv.select_all(action="DESELECT")
-            bpy.ops.object.mode_set(mode="OBJECT")
-
-            layer = mesh.uv_layers.active.data
-
-            for polygon in mesh.polygons:
+            for index, polygon in enumerate(mesh.polygons):
                 start = polygon.loop_start
                 end = start + polygon.loop_total
                 uvs = tuple(uv.uv for uv in layer[start:end])
                 island_index = 0
 
                 for i, island in enumerate(islands):
-                    if layer[start] in island:
+                    if index in island:
                         island_index = i
 
                 for triangle in tessellate_polygon([uvs]):
