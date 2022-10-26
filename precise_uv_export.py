@@ -2,7 +2,7 @@ bl_info = {
     "name": "Precise UV Export",
     "description": "Export pixel-perfect UV layouts as images",
     "author": "majik",
-    "version": (1, 1, 1),
+    "version": (1, 2, 0),
     "blender": (3, 0, 0),
     "category": "Import-Export"
 }
@@ -30,6 +30,9 @@ class ExportLayout(bpy.types.Operator):
 
     shade_islands: BoolProperty(default=True, name="Shade Islands",
                                 description="Shade separate UV islands differently")
+    
+    show_overlap: BoolProperty(default=True, name="Show Overlap",
+                               description="Shade overlapping UV islands differently")
 
     @classmethod
     def poll(cls, context):
@@ -91,8 +94,7 @@ class ExportLayout(bpy.types.Operator):
 
             while dist < length:
                 if x_min <= x < x_max and y_min <= y < y_max:
-                    offset = (y * width + x) * 4
-                    pixels[offset:offset + 4] = get_colour()
+                    set_index(x, y)
 
                 if x_dist < y_dist:
                     x_dist += x_delta
@@ -114,19 +116,34 @@ class ExportLayout(bpy.types.Operator):
                     positive = dist_a > 0 or dist_b > 0 or dist_c > 0
 
                     if not (negative and positive):
-                        offset = (y * width + x) * 4
-                        pixels[offset:offset + 4] = get_colour()
+                        set_index(x, y)
 
-        def get_colour():
+        def set_index(x, y):
+            offset = y * width + x
+            index = island_index + 1
+            current = pixels[offset]
+
+            if self.show_overlap and current != 0 and current != index:
+                index = -1
+            
+            pixels[offset] = index
+
+        def get_colour(index):
+            if index == 0:
+                return 0, 0, 0, 0
+            
+            if index == -1:
+                return 0.1, 0.1, 0.1, 1
+
             if self.shade_islands:
-                value = 1 - (island_index % 9) * 0.05
+                value = 1 - (index - 1) % 9 * 0.05
 
                 return value, value, value, 1
             
             return 1, 1, 1, 1
 
         width, height = self.size
-        pixels = [0, 0, 0, 0] * width * height
+        pixels = [0] * width * height
 
         for triangle in triangles:
             island_index = triangle.pop()
@@ -145,6 +162,8 @@ class ExportLayout(bpy.types.Operator):
             draw_line(*v3, *v1)
 
             fill_poly(*v1, *v2, *v3)
+
+        pixels = [v for pixel in pixels for v in get_colour(pixel)]
 
         try:
             image = bpy.data.images.new("temp", width, height, alpha=True)
