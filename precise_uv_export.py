@@ -2,7 +2,7 @@ bl_info = {
     "name": "Precise UV Export",
     "description": "Export pixel-perfect UV layouts as images",
     "author": "majik",
-    "version": (1, 2, 0),
+    "version": (1, 2, 1),
     "blender": (3, 0, 0),
     "category": "Import-Export"
 }
@@ -209,18 +209,16 @@ class ExportLayout(bpy.types.Operator):
             layer = mesh.uv_layers.active.data
             islands = bpy_extras.mesh_utils.mesh_linked_uv_islands(mesh)
 
-            for index, polygon in enumerate(mesh.polygons):
-                start = polygon.loop_start
-                end = start + polygon.loop_total
-                uvs = tuple(uv.uv for uv in layer[start:end])
-                island_index = 0
+            for index, island in enumerate(islands):
+                for polygon_index in island:
+                    polygon = mesh.polygons[polygon_index]
+                    
+                    start = polygon.loop_start
+                    end = start + polygon.loop_total
+                    uvs = tuple(uv.uv for uv in layer[start:end])
 
-                for i, island in enumerate(islands):
-                    if index in island:
-                        island_index = i
-
-                for triangle in tessellate_polygon([uvs]):
-                    yield [tuple(uvs[i]) for i in triangle] + [island_index]
+                    for triangle in tessellate_polygon([uvs]):
+                        yield [tuple(uvs[i]) for i in triangle] + [index]
 
 # Register and unregister.
 
