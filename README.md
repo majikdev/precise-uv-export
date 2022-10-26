@@ -18,6 +18,7 @@ Convenient for making low-resolution pixelated textures, where the default UV ex
 3. Press `Export Precise Layout`.
 
 The exported image takes the size of the image in the editor, or 16x16.<br>
-Each island in the UV layout is coloured in a different shade of grey.
+Each island in the UV layout is coloured in a different shade of grey.<br>
+Pixels, where multiple UV islands overlap, are coloured in black.
 
 *These settings can be changed during the exporting process.*
