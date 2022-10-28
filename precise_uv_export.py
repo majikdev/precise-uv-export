@@ -7,9 +7,10 @@ bl_info = {
     "category": "Import-Export"
 }
 
-import bpy, bpy_extras, os
+import bpy, os
 
 from bpy.props import StringProperty, BoolProperty, IntVectorProperty
+from bpy_extras.mesh_utils import mesh_linked_uv_islands
 from mathutils.geometry import tessellate_polygon
 from math import ceil, sqrt, isclose
 
