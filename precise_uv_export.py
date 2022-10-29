@@ -208,7 +208,7 @@ class ExportLayout(bpy.types.Operator):
     def get_mesh_triangles(meshes):
         for mesh in meshes:
             layer = mesh.uv_layers.active.data
-            islands = bpy_extras.mesh_utils.mesh_linked_uv_islands(mesh)
+            islands = mesh_linked_uv_islands(mesh)
 
             for index, island in enumerate(islands):
                 for polygon_index in island:
