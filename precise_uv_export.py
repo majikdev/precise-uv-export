@@ -211,9 +211,9 @@ class ExportLayout(bpy.types.Operator):
             islands = mesh_linked_uv_islands(mesh)
 
             for index, island in enumerate(islands):
-                for polygon_index in island:
-                    polygon = mesh.polygons[polygon_index]
-                    
+                for poly_index in island:
+                    polygon = mesh.polygons[poly_index]
+
                     start = polygon.loop_start
                     end = start + polygon.loop_total
                     uvs = tuple(uv.uv for uv in layer[start:end])
