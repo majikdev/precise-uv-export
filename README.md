@@ -19,6 +19,7 @@ Convenient for making low-resolution pixelated textures, where the default UV ex
 
 The exported image takes the size of the image in the editor, or 16x16.<br>
 Each island in the UV layout is coloured in a different shade of grey.<br>
-Pixels, where multiple UV islands overlap, are coloured in black.
+Each island also has a checkerboard overlay to make referencing the model easier.<br>
+Pixels, where multiple UV islands overlap, can be set to black (not enabled by default).
 
 *These settings can be changed during the exporting process.*

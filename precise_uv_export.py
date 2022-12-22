@@ -132,19 +132,22 @@ class ExportLayout(bpy.types.Operator):
             
             pixels[offset] = index
 
-        def get_colour(index):
+        def get_colour(position, index):
             if index == 0:
-                return 0, 0, 0, 0
-            
-            if index == -1:
-                return 0.1, 0.1, 0.1, 1
+                return 0.0, 0.0, 0.0, 0.0
 
-            if self.shade_islands:
-                value = 1 - (index - 1) % 9 * 0.05
+            # White normally, dark grey if overlap.
+            value = 1.0 if index > 0 else 0.1
 
-                return value, value, value, 1
-            
-            return 1, 1, 1, 1
+            # Give islands different shades of grey.
+            if self.shade_islands and index > 0:
+                value = 1.0 - (index - 1) % 6 * 0.1
+
+            # Overlay a grid over the pixels.
+            if self.grid_overlay and position % 2 == 1:
+                value -= 0.04
+
+            return value, value, value, 1
 
         width, height = self.size
         pixels = [0] * width * height
@@ -167,11 +170,19 @@ class ExportLayout(bpy.types.Operator):
 
             fill_poly(*v1, *v2, *v3)
 
-        pixels = [v for pixel in pixels for v in get_colour(pixel)]
+        image_pixels = [0, 0, 0, 0] * width * height
+
+        for iy in range(height):
+            for ix in range(width):
+                index = iy * width + ix
+                start = index * 4
+                end = index * 4 + 4
+
+                image_pixels[start:end] = get_colour(ix + iy, pixels[index])
 
         try:
             image = bpy.data.images.new("temp", width, height, alpha=True)
-            image.filepath, image.pixels = path, pixels
+            image.filepath, image.pixels = path, image_pixels
             image.save()
 
             bpy.data.images.remove(image)
