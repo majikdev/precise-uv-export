@@ -31,7 +31,10 @@ class ExportLayout(bpy.types.Operator):
 
     shade_islands: BoolProperty(default=True, name="Shade Islands",
                                 description="Shade separate UV islands differently")
-    
+
+    grid_overlay: BoolProperty(default=True, name="Grid Overlay",
+                               description="Overlay a grid on the exported image")
+
     show_overlap: BoolProperty(default=False, name="Show Overlap",
                                description="Shade overlapping UV islands differently.\nNOTE: This does not always work")
 
