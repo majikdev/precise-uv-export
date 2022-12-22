@@ -2,7 +2,7 @@ bl_info = {
     "name": "Precise UV Export",
     "description": "Export pixel-perfect UV layouts as images",
     "author": "majik",
-    "version": (1, 2, 1),
+    "version": (1, 3, 0),
     "blender": (3, 0, 0),
     "category": "Import-Export"
 }
@@ -32,8 +32,8 @@ class ExportLayout(bpy.types.Operator):
     shade_islands: BoolProperty(default=True, name="Shade Islands",
                                 description="Shade separate UV islands differently")
     
-    show_overlap: BoolProperty(default=True, name="Show Overlap",
-                               description="Shade overlapping UV islands differently")
+    show_overlap: BoolProperty(default=False, name="Show Overlap",
+                               description="Shade overlapping UV islands differently.\nNOTE: This does not always work")
 
     @classmethod
     def poll(cls, context):
