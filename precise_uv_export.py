@@ -7,7 +7,8 @@ bl_info = {
     'category': 'Import-Export'
 }
 
-import bpy, os
+import bpy
+import os
 
 from bpy.props import StringProperty, BoolProperty, IntVectorProperty
 from bpy_extras.mesh_utils import mesh_linked_uv_islands
