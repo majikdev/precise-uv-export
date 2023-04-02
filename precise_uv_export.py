@@ -24,6 +24,8 @@ class ExportLayout(bpy.types.Operator):
     bl_label = 'Export Precise Layout'
     bl_options = {'REGISTER', 'UNDO'}
 
+    # Export properties.
+
     filepath: StringProperty(subtype='FILE_PATH')
     check_existing: BoolProperty(default=True, options={'HIDDEN'})
 
