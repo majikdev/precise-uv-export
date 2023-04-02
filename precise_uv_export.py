@@ -129,12 +129,12 @@ class ExportLayout(bpy.types.Operator):
         def set_index(x, y):
             offset = y * width + x
             index = island_index + 1
-            current = pixels[offset]
+            current = indices[offset]
 
             if self.show_overlap and current != 0 and current != index:
                 index = -1
             
-            pixels[offset] = index
+            indices[offset] = index
 
         def get_colour(position, index):
             if index == 0:
@@ -147,14 +147,14 @@ class ExportLayout(bpy.types.Operator):
             if self.shade_islands and index > 0:
                 value = 1.0 - (index - 1) % 6 * 0.1
 
-            # Overlay a grid over the pixels.
+            # Overlay a grid over the image.
             if self.grid_overlay and position % 2 == 1:
                 value -= 0.04
 
             return value, value, value, 1
 
         width, height = self.size
-        pixels = [0] * width * height
+        indices = [0] * width * height
 
         for triangle in triangles:
             island_index = triangle.pop()
@@ -173,7 +173,7 @@ class ExportLayout(bpy.types.Operator):
             draw_line(*v3, *v1)
             fill_poly(*v1, *v2, *v3)
 
-        image_pixels = [0, 0, 0, 0] * width * height
+        pixels = [0, 0, 0, 0] * width * height
 
         for iy in range(height):
             for ix in range(width):
@@ -181,11 +181,11 @@ class ExportLayout(bpy.types.Operator):
                 start = index * 4
                 end = index * 4 + 4
 
-                image_pixels[start:end] = get_colour(ix + iy, pixels[index])
+                pixels[start:end] = get_colour(ix + iy, indices[index])
 
         try:
             image = bpy.data.images.new('temp', width, height, alpha=True)
-            image.filepath, image.pixels = path, image_pixels
+            image.filepath, image.pixels = path, pixels
             image.save()
 
             bpy.data.images.remove(image)
