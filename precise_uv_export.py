@@ -69,6 +69,7 @@ class ExportLayout(bpy.types.Operator):
         path = bpy.path.ensure_ext(self.filepath, '.png')
         meshes = list(self.get_meshes_to_export(context))
         triangles = list(self.get_mesh_triangles(meshes))
+
         self.export_uv_layout(path, triangles)
 
         if edit_mode:
@@ -170,7 +171,6 @@ class ExportLayout(bpy.types.Operator):
             draw_line(*v1, *v2)
             draw_line(*v2, *v3)
             draw_line(*v3, *v1)
-
             fill_poly(*v1, *v2, *v3)
 
         image_pixels = [0, 0, 0, 0] * width * height
