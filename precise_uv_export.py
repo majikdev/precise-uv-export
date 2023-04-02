@@ -1,10 +1,10 @@
 bl_info = {
-    "name": "Precise UV Export",
-    "description": "Export pixel-perfect UV layouts as images",
-    "author": "majik",
-    "version": (1, 3, 0),
-    "blender": (3, 0, 0),
-    "category": "Import-Export"
+    'name': 'Precise UV Export',
+    'description': 'Export pixel-perfect UV layouts as images',
+    'author': 'majik',
+    'version': (1, 3, 1),
+    'blender': (3, 0, 0),
+    'category': 'Import-Export'
 }
 
 import bpy, os
@@ -19,59 +19,59 @@ from math import ceil, sqrt, isclose
 class ExportLayout(bpy.types.Operator):
     """Export pixel-perfect UV layouts as images"""
 
-    bl_idname = "uv.export_precise_layout"
-    bl_label = "Export Precise Layout"
-    bl_options = {"REGISTER", "UNDO"}
+    bl_idname = 'uv.export_precise_layout'
+    bl_label = 'Export Precise Layout'
+    bl_options = {'REGISTER', 'UNDO'}
 
-    filepath: StringProperty(subtype="FILE_PATH")
-    check_existing: BoolProperty(default=True, options={"HIDDEN"})
+    filepath: StringProperty(subtype='FILE_PATH')
+    check_existing: BoolProperty(default=True, options={'HIDDEN'})
 
-    size: IntVectorProperty(size=2, min=2, max=8192, default=(16, 16), name="Image Size",
-                            description="Dimensions of the exported layout image")
+    size: IntVectorProperty(size=2, min=2, max=8192, default=(16, 16), name='Image Size',
+                            description='Dimensions of the exported layout image')
 
-    shade_islands: BoolProperty(default=True, name="Shade Islands",
-                                description="Shade separate UV islands differently")
+    shade_islands: BoolProperty(default=True, name='Shade Islands',
+                                description='Shade separate UV islands differently')
 
-    grid_overlay: BoolProperty(default=True, name="Grid Overlay",
-                               description="Overlay a grid on the exported image")
+    grid_overlay: BoolProperty(default=True, name='Grid Overlay',
+                               description='Overlay a grid on the exported image')
 
-    show_overlap: BoolProperty(default=False, name="Show Overlap",
-                               description="Shade overlapping UV islands differently.\nNOTE: This does not always work")
+    show_overlap: BoolProperty(default=False, name='Show Overlap',
+                               description='Shade overlapping UV islands differently.\nNOTE: This does not always work')
 
     @classmethod
     def poll(cls, context):
         mesh = context.active_object
 
-        return mesh is not None and mesh.type == "MESH" and mesh.data.uv_layers
+        return mesh is not None and mesh.type == 'MESH' and mesh.data.uv_layers
 
     def invoke(self, context, event):
         self.size = self.get_image_size(context, self.size)
-        self.filepath = f"{context.active_object.name.replace('.', '_')}.png"
+        self.filepath = context.active_object.name.replace('.', '_') + '.png'
         context.window_manager.fileselect_add(self)
 
-        return {"RUNNING_MODAL"}
+        return {'RUNNING_MODAL'}
 
     def check(self, context):
-        self.filepath = bpy.path.ensure_ext(self.filepath, ".png")
+        self.filepath = bpy.path.ensure_ext(self.filepath, '.png')
 
         return True
 
     def execute(self, context):
         mesh = context.active_object
-        edit_mode = mesh.mode == "EDIT"
+        edit_mode = mesh.mode == 'EDIT'
 
         if edit_mode:
-            bpy.ops.object.mode_set(mode="OBJECT")
+            bpy.ops.object.mode_set(mode='OBJECT')
 
-        path = bpy.path.ensure_ext(self.filepath, ".png")
+        path = bpy.path.ensure_ext(self.filepath, '.png')
         meshes = list(self.get_meshes_to_export(context))
         triangles = list(self.get_mesh_triangles(meshes))
         self.export_uv_layout(path, triangles)
 
         if edit_mode:
-            bpy.ops.object.mode_set(mode="EDIT")
+            bpy.ops.object.mode_set(mode='EDIT')
 
-        return {"FINISHED"}
+        return {'FINISHED'}
 
     def export_uv_layout(self, path, triangles):
         def draw_line(ax, ay, bx, by):
@@ -181,7 +181,7 @@ class ExportLayout(bpy.types.Operator):
                 image_pixels[start:end] = get_colour(ix + iy, pixels[index])
 
         try:
-            image = bpy.data.images.new("temp", width, height, alpha=True)
+            image = bpy.data.images.new('temp', width, height, alpha=True)
             image.filepath, image.pixels = path, image_pixels
             image.save()
 
@@ -208,7 +208,7 @@ class ExportLayout(bpy.types.Operator):
     @staticmethod
     def get_meshes_to_export(context):
         for mesh in {*context.selected_objects, context.active_object}:
-            if mesh.type != "MESH":
+            if mesh.type != 'MESH':
                 continue
 
             mesh = mesh.data
@@ -248,5 +248,5 @@ def unregister():
     bpy.utils.unregister_class(ExportLayout)
     bpy.types.IMAGE_MT_uvs.remove(menu_entry)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     register()
