@@ -78,27 +78,27 @@ class ExportLayout(bpy.types.Operator):
         return {'FINISHED'}
 
     def export_uv_layout(self, path, triangles):
-        def draw_line(ax, ay, bx, by):
-            length = sqrt((bx - ax) ** 2 + (by - ay) ** 2)
-            x_dir, y_dir = (bx - ax) / length, (by - ay) / length
-            x, y, dist = int(ax), int(ay), 0
+        def draw_line(x1, y1, x2, y2):
+            length = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            x_dir, y_dir = (x2 - x1) / length, (y2 - y1) / length
+            x, y, dist = int(x1), int(y1), 0
 
             x_delta = 1e6 if x_dir == 0 else abs(1 / x_dir)
             y_delta = 1e6 if y_dir == 0 else abs(1 / y_dir)
 
             if x_dir < 0:
                 x_step = -1
-                x_dist = (ax - x) * x_delta
+                x_dist = (x1 - x) * x_delta
             else:
                 x_step = 1
-                x_dist = (x - ax + 1) * x_delta
+                x_dist = (x - x1 + 1) * x_delta
 
             if y_dir < 0:
                 y_step = -1
-                y_dist = (ay - y) * y_delta
+                y_dist = (y1 - y) * y_delta
             else:
                 y_step = 1
-                y_dist = (y - ay + 1) * y_delta
+                y_dist = (y - y1 + 1) * y_delta
 
             while dist < length:
                 if x_min <= x < x_max and y_min <= y < y_max:
@@ -113,12 +113,12 @@ class ExportLayout(bpy.types.Operator):
                     y += y_step
                     dist = y_dist - y_delta
 
-        def fill_poly(ax, ay, bx, by, cx, cy):
+        def fill_poly(x1, y1, x2, y2, x3, y3):
             for x in range(x_min, x_max):
                 for y in range(y_min, y_max):
-                    dist_a = (x - bx) * (ay - by) - (ax - bx) * (y - by)
-                    dist_b = (x - cx) * (by - cy) - (bx - cx) * (y - cy)
-                    dist_c = (x - ax) * (cy - ay) - (cx - ax) * (y - ay)
+                    dist_a = (x - x2) * (y1 - y2) - (x1 - x2) * (y - y2)
+                    dist_b = (x - x3) * (y2 - y3) - (x2 - x3) * (y - y3)
+                    dist_c = (x - x1) * (y3 - y1) - (x3 - x1) * (y - y1)
 
                     negative = dist_a < 0 or dist_b < 0 or dist_c < 0
                     positive = dist_a > 0 or dist_b > 0 or dist_c > 0
