@@ -78,6 +78,19 @@ class ExportLayout(bpy.types.Operator):
         return {'FINISHED'}
 
     def export_uv_layout(self, path, triangles):
+        def draw_triangle(x1, y1, x2, y2, x3, y3):
+            for x in range(x_min, x_max):
+                for y in range(y_min, y_max):
+                    dist_a = (x - x2) * (y1 - y2) - (x1 - x2) * (y - y2)
+                    dist_b = (x - x3) * (y2 - y3) - (x2 - x3) * (y - y3)
+                    dist_c = (x - x1) * (y3 - y1) - (x3 - x1) * (y - y1)
+
+                    negative = dist_a < 0 or dist_b < 0 or dist_c < 0
+                    positive = dist_a > 0 or dist_b > 0 or dist_c > 0
+
+                    if not (negative and positive):
+                        set_index(x, y)
+
         def draw_line(x1, y1, x2, y2):
             length = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
             x_dir, y_dir = (x2 - x1) / length, (y2 - y1) / length
@@ -113,19 +126,6 @@ class ExportLayout(bpy.types.Operator):
                     y += y_step
                     dist = y_dist - y_delta
 
-        def fill_poly(x1, y1, x2, y2, x3, y3):
-            for x in range(x_min, x_max):
-                for y in range(y_min, y_max):
-                    dist_a = (x - x2) * (y1 - y2) - (x1 - x2) * (y - y2)
-                    dist_b = (x - x3) * (y2 - y3) - (x2 - x3) * (y - y3)
-                    dist_c = (x - x1) * (y3 - y1) - (x3 - x1) * (y - y1)
-
-                    negative = dist_a < 0 or dist_b < 0 or dist_c < 0
-                    positive = dist_a > 0 or dist_b > 0 or dist_c > 0
-
-                    if not (negative and positive):
-                        set_index(x, y)
-
         def set_index(x, y):
             offset = y * width + x
             index = island_index + 1
@@ -153,6 +153,8 @@ class ExportLayout(bpy.types.Operator):
 
             return value, value, value, 1
 
+        # Create and populate the index buffer.
+
         width, height = self.size
         indices = [0] * width * height
 
@@ -168,10 +170,12 @@ class ExportLayout(bpy.types.Operator):
             x_max = int(x_max) if isclose(x_max, int(x_max), rel_tol=1e-4) else ceil(x_max)
             y_max = int(y_max) if isclose(y_max, int(y_max), rel_tol=1e-4) else ceil(y_max)
 
+            draw_triangle(*v1, *v2, *v3)
             draw_line(*v1, *v2)
             draw_line(*v2, *v3)
             draw_line(*v3, *v1)
-            fill_poly(*v1, *v2, *v3)
+
+        # Create and populate the pixel buffer.
 
         pixels = [0, 0, 0, 0] * width * height
 
@@ -182,6 +186,8 @@ class ExportLayout(bpy.types.Operator):
                 end = index * 4 + 4
 
                 pixels[start:end] = get_colour(ix + iy, indices[index])
+
+        # Save the image.
 
         try:
             image = bpy.data.images.new('temp', width, height, alpha=True)
