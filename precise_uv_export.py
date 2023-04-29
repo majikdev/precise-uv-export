@@ -26,6 +26,7 @@ class ExportLayout(bpy.types.Operator):
     # Export properties.
 
     filepath: StringProperty(subtype='FILE_PATH')
+
     check_existing: BoolProperty(default=True, options={'HIDDEN'})
 
     size: IntVectorProperty(size=2, min=2, max=8192, default=(16, 16), name='Image Size',
@@ -186,7 +187,7 @@ class ExportLayout(bpy.types.Operator):
 
                 pixels[start:end] = get_colour(ix + iy, indices[index])
 
-        # Save the image.
+        # Save the image file.
 
         try:
             image = bpy.data.images.new('temp', width, height, alpha=True)
@@ -243,7 +244,7 @@ class ExportLayout(bpy.types.Operator):
                     for triangle in tessellate_polygon([uvs]):
                         yield [tuple(uvs[i]) for i in triangle] + [index]
 
-# Register and unregister.
+# Register and unregister the add-on.
 
 def menu_entry(self, context):
     self.layout.operator(ExportLayout.bl_idname)
