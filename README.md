@@ -1,9 +1,6 @@
 ### Precise UV Export
 
-The **Precise UV Export** add-on lets you export a pixel-perfect UV layout of a mesh to an image.<br>
-Convenient for making low-resolution pixelated textures, where the default UV export is not ideal.
-
-***Note:** This addon only works with Blender 3.0.0 or above.*
+**Precise UV Export** is an add-on for Blender 3.0.0+. It lets you export a pixel-perfect UV layout of a mesh to an image. Convenient for making low-resolution pixelated textures, where the default UV export is not ideal.
 
 **How to install:**
 
