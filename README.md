@@ -11,15 +11,15 @@ Convenient for making low-resolution pixelated textures, where the default UV ex
 2. Install `precise_uv_export.py` in Blender's preferences.
 3. Enable the add-on.
 
-**How to use:**
+**How to export:**
 
 1. Open the `UV Editor` view.
 2. Open the `UV` drop-down menu.
 3. Press `Export Precise Layout`.
 
-The exported image takes the size of the image in the editor, or 16x16.<br>
-Each island in the UV layout is coloured in a different shade of grey.<br>
-Each island also has a checkerboard overlay to make referencing the model easier.<br>
-Pixels, where multiple UV islands overlap, can be set to black (not enabled by default).
+**Export settings:**
 
-*These settings can be changed during the exporting process.*
+* **Image Size** - specify the width and height of the exported image.
+* **Shade Islands** - fill each island with a different shade of grey.
+* **Grid Overlay** - overlay a checkerboard pattern to make referencing the model easier.
+* **Show Overlap** - colour pixels with multiple overlapping islands black (inconsistent).
