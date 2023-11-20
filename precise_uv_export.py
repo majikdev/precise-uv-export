@@ -61,9 +61,9 @@ class ExportLayout(bpy.types.Operator):
 
     def execute(self, context):
         mesh = context.active_object
-        edit_mode = mesh.mode == 'EDIT'
+        editing = (mesh.mode == 'EDIT')
 
-        if edit_mode:
+        if editing:
             bpy.ops.object.mode_set(mode='OBJECT')
 
         path = bpy.path.ensure_ext(self.filepath, '.png')
@@ -72,7 +72,7 @@ class ExportLayout(bpy.types.Operator):
 
         self.export_uv_layout(path, triangles)
 
-        if edit_mode:
+        if editing:
             bpy.ops.object.mode_set(mode='EDIT')
 
         return {'FINISHED'}
@@ -134,14 +134,14 @@ class ExportLayout(bpy.types.Operator):
 
         def get_colour(position, index):
             if index == 0:
-                return 0.0, 0.0, 0.0, 0.0
+                return 0, 0, 0, 0
 
-            # White normally, dark grey if overlap.
-            value = 1.0 if index > 0 else 0.1
+            # White normally.
+            value = 1
 
             # Give islands different shades of grey.
             if self.shade_islands and index > 0:
-                value = 1.0 - (index - 1) % 6 * 0.1
+                value = 1 - (index - 1) % 6 * 0.1
 
             # Overlay a grid over the image.
             if self.grid_overlay and position % 2 == 1:
@@ -152,7 +152,7 @@ class ExportLayout(bpy.types.Operator):
         # Create and populate the index buffer.
 
         width, height = self.size
-        indices = [0] * width * height
+        indices = [0] * (width * height)
 
         for triangle in triangles:
             island_index = triangle.pop()
@@ -173,13 +173,13 @@ class ExportLayout(bpy.types.Operator):
 
         # Create and populate the pixel buffer.
 
-        pixels = [0, 0, 0, 0] * width * height
+        pixels = [0] * (width * height * 4)
 
         for iy in range(height):
             for ix in range(width):
                 index = iy * width + ix
                 start = index * 4
-                end = index * 4 + 4
+                end = start + 4
 
                 pixels[start:end] = get_colour(ix + iy, indices[index])
 
