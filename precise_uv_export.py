@@ -67,8 +67,8 @@ class ExportLayout(bpy.types.Operator):
             bpy.ops.object.mode_set(mode='OBJECT')
 
         path = bpy.path.ensure_ext(self.filepath, '.png')
-        meshes = list(self.get_meshes_to_export(context))
-        triangles = list(self.get_mesh_triangles(meshes))
+        meshes = list(self.get_meshes(context))
+        triangles = list(self.get_triangles(meshes))
 
         self.export_uv_layout(path, triangles)
 
@@ -129,7 +129,6 @@ class ExportLayout(bpy.types.Operator):
         def set_index(x, y):
             offset = y * width + x
             index = island_index + 1
-            
             indices[offset] = index
 
         def get_colour(position, index):
@@ -157,7 +156,7 @@ class ExportLayout(bpy.types.Operator):
         for triangle in triangles:
             island_index = triangle.pop()
             v1, v2, v3 = [(x * width, y * height) for x, y in triangle]
-            
+
             x_min, x_max = max(min(v1[0], v2[0], v3[0]), 0), min(max(v1[0], v2[0], v3[0]), width)
             y_min, y_max = max(min(v1[1], v2[1], v3[1]), 0), min(max(v1[1], v2[1], v3[1]), height)
 
@@ -191,7 +190,6 @@ class ExportLayout(bpy.types.Operator):
             image.save()
 
             bpy.data.images.remove(image)
-
         except:
             pass
 
@@ -211,7 +209,7 @@ class ExportLayout(bpy.types.Operator):
         return width, height
 
     @staticmethod
-    def get_meshes_to_export(context):
+    def get_meshes(context):
         for mesh in {*context.selected_objects, context.active_object}:
             if mesh.type != 'MESH':
                 continue
@@ -224,7 +222,7 @@ class ExportLayout(bpy.types.Operator):
             yield mesh
 
     @staticmethod
-    def get_mesh_triangles(meshes):
+    def get_triangles(meshes):
         for mesh in meshes:
             layer = mesh.uv_layers.active.data
             islands = mesh_linked_uv_islands(mesh)
