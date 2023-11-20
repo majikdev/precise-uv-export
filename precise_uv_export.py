@@ -89,7 +89,7 @@ class ExportLayout(bpy.types.Operator):
                     positive = dist_a > 0 or dist_b > 0 or dist_c > 0
 
                     if not (negative and positive):
-                        set_index(x, y)
+                        indices[y * width + x] = island_index
 
         def draw_line(x1, y1, x2, y2):
             length = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -115,7 +115,7 @@ class ExportLayout(bpy.types.Operator):
 
             while dist < length:
                 if x_min <= x < x_max and y_min <= y < y_max:
-                    set_index(x, y)
+                    indices[y * width + x] = island_index
 
                 if x_dist < y_dist:
                     x_dist += x_delta
@@ -125,9 +125,6 @@ class ExportLayout(bpy.types.Operator):
                     y_dist += y_delta
                     y += y_step
                     dist = y_dist - y_delta
-
-        def set_index(x, y):
-            indices[y * width + x] = island_index
 
         def get_colour(position, index):
             if index == -1:
