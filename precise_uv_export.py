@@ -135,12 +135,11 @@ class ExportLayout(bpy.types.Operator):
             if index == 0:
                 return 0, 0, 0, 0
 
-            # White normally.
             value = 1
 
             # Give islands different shades of grey.
             if self.shade_islands and index > 0:
-                value = 1 - (index - 1) % 6 * 0.1
+                value -= (index - 1) % 6 * 0.1
 
             # Overlay a grid over the image.
             if self.grid_overlay and position % 2 == 1:
@@ -214,12 +213,10 @@ class ExportLayout(bpy.types.Operator):
             if mesh.type != 'MESH':
                 continue
 
-            mesh = mesh.data
-
-            if mesh.uv_layers.active is None:
+            if mesh.data.uv_layers.active is None:
                 continue
 
-            yield mesh
+            yield mesh.data
 
     @staticmethod
     def get_triangles(meshes):
