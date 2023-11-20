@@ -168,13 +168,13 @@ class ExportLayout(bpy.types.Operator):
 
         pixels = [0] * (width * height * 4)
 
-        for iy in range(height):
-            for ix in range(width):
-                index = iy * width + ix
+        for y in range(height):
+            for x in range(width):
+                index = y * width + x
                 start = index * 4
                 end = start + 4
 
-                pixels[start:end] = get_colour(ix + iy, indices[index])
+                pixels[start:end] = get_colour(x + y, indices[index])
 
         # Save the image file.
 
