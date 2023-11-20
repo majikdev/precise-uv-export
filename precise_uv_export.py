@@ -2,7 +2,7 @@ bl_info = {
     'name': 'Precise UV Export',
     'description': 'Export pixel-perfect UV layouts as images',
     'author': 'majik',
-    'version': (1, 3, 1),
+    'version': (1, 4, 0),
     'blender': (3, 0, 0),
     'category': 'Import-Export'
 }
@@ -38,8 +38,8 @@ class ExportLayout(bpy.types.Operator):
     grid_overlay: BoolProperty(default=True, name='Grid Overlay',
                                description='Overlay a grid on the exported image')
 
-    show_overlap: BoolProperty(default=False, name='Show Overlap',
-                               description='Shade overlapping UV islands differently.\nNOTE: This does not always work')
+    #add_padding: BoolProperty(default=False, name='Add Padding',
+    #                          description='Add padding to UV islands for filtered textures.')
 
     @classmethod
     def poll(cls, context):
@@ -129,10 +129,6 @@ class ExportLayout(bpy.types.Operator):
         def set_index(x, y):
             offset = y * width + x
             index = island_index + 1
-            current = indices[offset]
-
-            if self.show_overlap and current != 0 and current != index:
-                index = -1
             
             indices[offset] = index
 
