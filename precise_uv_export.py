@@ -134,7 +134,7 @@ class ExportLayout(bpy.types.Operator):
 
             # Give islands different shades of grey.
             if self.shade_islands:
-                value -= index % 6 * 0.1
+                value -= (index % 6) * 0.1
 
             # Overlay a grid over the image.
             if self.grid_overlay and position % 2 == 1:
