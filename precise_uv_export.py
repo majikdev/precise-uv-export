@@ -127,19 +127,17 @@ class ExportLayout(bpy.types.Operator):
                     dist = y_dist - y_delta
 
         def set_index(x, y):
-            offset = y * width + x
-            index = island_index + 1
-            indices[offset] = index
+            indices[y * width + x] = island_index
 
         def get_colour(position, index):
-            if index == 0:
+            if index == -1:
                 return 0, 0, 0, 0
 
             value = 1
 
             # Give islands different shades of grey.
-            if self.shade_islands and index > 0:
-                value -= (index - 1) % 6 * 0.1
+            if self.shade_islands:
+                value -= index % 6 * 0.1
 
             # Overlay a grid over the image.
             if self.grid_overlay and position % 2 == 1:
@@ -150,7 +148,7 @@ class ExportLayout(bpy.types.Operator):
         # Create and populate the index buffer.
 
         width, height = self.size
-        indices = [0] * (width * height)
+        indices = [-1] * (width * height)
 
         for triangle in triangles:
             island_index = triangle.pop()
