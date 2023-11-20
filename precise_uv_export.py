@@ -126,23 +126,22 @@ class ExportLayout(bpy.types.Operator):
                     y += y_step
                     dist = y_dist - y_delta
 
-        def get_colour(position, index):
+        def get_colour(x, y):
+            index = indices[y * width + x]
+            value = 1
+
             if index == -1:
                 return 0, 0, 0, 0
 
-            value = 1
-
-            # Give islands different shades of grey.
             if self.shade_islands:
                 value -= (index % 6) * 0.1
 
-            # Overlay a grid over the image.
-            if self.grid_overlay and position % 2 == 1:
+            if self.grid_overlay and (x + y) % 2 == 1:
                 value -= 0.04
 
             return value, value, value, 1
 
-        # Create and populate the index buffer.
+        # Draw triangles to an index buffer.
 
         width, height = self.size
         indices = [-1] * (width * height)
@@ -164,19 +163,9 @@ class ExportLayout(bpy.types.Operator):
             draw_line(*v2, *v3)
             draw_line(*v3, *v1)
 
-        # Create and populate the pixel buffer.
+        # Create and save the image.
 
-        pixels = [0] * (width * height * 4)
-
-        for y in range(height):
-            for x in range(width):
-                index = y * width + x
-                start = index * 4
-                end = start + 4
-
-                pixels[start:end] = get_colour(x + y, indices[index])
-
-        # Save the image file.
+        pixels = [i for y in range(height) for x in range(width) for i in get_colour(x, y)]
 
         try:
             image = bpy.data.images.new('temp', width, height, alpha=True)
