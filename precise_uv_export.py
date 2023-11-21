@@ -38,9 +38,6 @@ class ExportLayout(bpy.types.Operator):
     grid_overlay: BoolProperty(default=True, name='Grid Overlay',
                                description='Overlay a grid on the exported image')
 
-    #add_padding: BoolProperty(default=False, name='Add Padding',
-    #                          description='Add padding to UV islands for filtered textures.')
-
     @classmethod
     def poll(cls, context):
         mesh = context.active_object
