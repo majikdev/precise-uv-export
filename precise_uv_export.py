@@ -141,7 +141,7 @@ class ExportLayout(bpy.types.Operator):
 
             return value, value, value, 1
 
-        # Draw triangles to an index buffer.
+        # Draw triangles to a buffer.
 
         width, height = self.size
         indices = [-1] * (width * height)
