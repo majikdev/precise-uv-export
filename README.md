@@ -19,4 +19,3 @@
 * **Image Size** - specify the width and height of the exported image.
 * **Shade Islands** - fill each island with a different shade of grey.
 * **Grid Overlay** - overlay a checkerboard pattern to make referencing the model easier.
-* **Show Overlap** - colour pixels with multiple overlapping islands black (inconsistent).
