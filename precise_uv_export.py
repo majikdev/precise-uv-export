@@ -169,7 +169,8 @@ class ExportLayout(bpy.types.Operator):
 
         try:
             image = bpy.data.images.new('temp', width, height, alpha=True)
-            image.filepath, image.pixels = path, pixels
+            image.filepath = path
+            image.pixels = pixels
             image.save()
 
             bpy.data.images.remove(image)
