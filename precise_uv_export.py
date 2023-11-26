@@ -38,6 +38,9 @@ class ExportLayout(bpy.types.Operator):
     grid_overlay: BoolProperty(default=True, name='Grid Overlay',
                                description='Overlay a grid on the exported image')
 
+    outline_islands: BoolProperty(default=False, name='Outline Islands',
+                                  description='Draw an outline around every island')
+
     @classmethod
     def poll(cls, context):
         mesh = context.active_object
@@ -125,18 +128,37 @@ class ExportLayout(bpy.types.Operator):
 
         def get_colour(x, y):
             index = indices[y * width + x]
-            value = 1
 
-            if index == -1:
-                return 0, 0, 0, 0
+            if index != -1:
+                value = 1
 
-            if self.shade_islands:
-                value -= (index % 6) * 0.1
+                if self.shade_islands:
+                    value -= (index % 6) * 0.1
 
-            if self.grid_overlay and (x + y) % 2 == 1:
-                value -= 0.04
+                if self.grid_overlay and (x + y) % 2 == 1:
+                    value -= 0.04
 
-            return value, value, value, 1
+                return value, value, value, 1
+
+            if self.outline_islands:
+                has_l = x > 0
+                has_r = x < width - 1
+                has_t = y > 0
+                has_b = y < height - 1
+
+                neighbours  = has_l and indices[y * width + (x - 1)] >= 0
+                neighbours += has_r and indices[y * width + (x + 1)] >= 0
+                neighbours += has_t and indices[(y - 1) * width + x] >= 0
+                neighbours += has_b and indices[(y + 1) * width + x] >= 0
+                neighbours += has_l and has_t and indices[(y - 1) * width + (x - 1)] >= 0
+                neighbours += has_r and has_t and indices[(y - 1) * width + (x + 1)] >= 0
+                neighbours += has_l and has_b and indices[(y + 1) * width + (x - 1)] >= 0
+                neighbours += has_r and has_b and indices[(y + 1) * width + (x + 1)] >= 0
+
+                if neighbours > 0:
+                    return 0, 0, 0, 1
+
+            return 0, 0, 0, 0
 
         # Draw triangles to a buffer.
 
