@@ -38,7 +38,7 @@ class ExportLayout(bpy.types.Operator):
     grid_overlay: BoolProperty(default=True, name='Grid Overlay',
                                description='Overlay a grid on the exported image')
 
-    outline_islands: BoolProperty(default=False, name='Outline Islands',
+    outline_islands: BoolProperty(default=True, name='Outline Islands',
                                   description='Draw an outline around every island')
 
     @classmethod
