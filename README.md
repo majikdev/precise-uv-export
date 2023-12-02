@@ -1,6 +1,6 @@
 ### Precise UV Export
 
-**Precise UV Export** is an add-on for Blender 3.0.0 or above. It lets you export a pixel-perfect UV layout of a mesh to an image. Convenient for making low-resolution pixelated textures, where the default UV export is not ideal.
+**Precise UV Export** is an add-on for Blender 3.0.0 or above. It lets you export a pixel-perfect UV layout of a mesh to an image. Convenient for making low-resolution textures, where the default UV export is not ideal.
 
 **How to install:**
 
@@ -18,4 +18,5 @@
 
 * **Image Size** - specify the width and height of the exported image.
 * **Shade Islands** - fill each island with a different shade of grey.
-* **Grid Overlay** - overlay a checkerboard pattern to make referencing the model easier.
+* **Grid Overlay** - overlay a checkerboard pattern on the exported image.
+* **Outline Islands** - draw an outline around every separate island.
