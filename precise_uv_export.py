@@ -1,3 +1,10 @@
+import bpy
+
+from bpy.props import StringProperty, BoolProperty, IntVectorProperty
+from bpy_extras.mesh_utils import mesh_linked_uv_islands
+from mathutils.geometry import tessellate_polygon
+from math import ceil, sqrt, isclose
+
 bl_info = {
     'name': 'Precise UV Export',
     'description': 'Export pixel-perfect UV layouts as images',
@@ -6,13 +13,6 @@ bl_info = {
     'blender': (3, 0, 0),
     'category': 'Import-Export'
 }
-
-import bpy
-
-from bpy.props import StringProperty, BoolProperty, IntVectorProperty
-from bpy_extras.mesh_utils import mesh_linked_uv_islands
-from mathutils.geometry import tessellate_polygon
-from math import ceil, sqrt, isclose
 
 # Precise UV export operator.
 
