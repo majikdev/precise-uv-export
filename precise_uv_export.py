@@ -77,7 +77,7 @@ class ExportLayout(bpy.types.Operator):
         return {'FINISHED'}
 
     def export_uv_layout(self, path, triangles):
-        def draw_triangle(x1, y1, x2, y2, x3, y3):
+        def draw_triangle(x1, y1, x2, y2, x3, y3, island):
             for x in range(x_min, x_max):
                 for y in range(y_min, y_max):
                     dist_a = (x - x2) * (y1 - y2) - (x1 - x2) * (y - y2)
@@ -88,9 +88,9 @@ class ExportLayout(bpy.types.Operator):
                     positive = dist_a > 0 or dist_b > 0 or dist_c > 0
 
                     if not (negative and positive):
-                        indices[y * width + x] = island_index
+                        indices[y * width + x] = island
 
-        def draw_line(x1, y1, x2, y2):
+        def draw_line(x1, y1, x2, y2, island):
             length = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
             x_dir, y_dir = (x2 - x1) / length, (y2 - y1) / length
             x, y, dist = int(x1), int(y1), 0
@@ -114,7 +114,7 @@ class ExportLayout(bpy.types.Operator):
 
             while dist < length:
                 if x_min <= x < x_max and y_min <= y < y_max:
-                    indices[y * width + x] = island_index
+                    indices[y * width + x] = island
 
                 if x_dist < y_dist:
                     x_dist += x_delta
@@ -176,10 +176,10 @@ class ExportLayout(bpy.types.Operator):
             x_max = int(x_max) if isclose(x_max, int(x_max), rel_tol=1e-4) else ceil(x_max)
             y_max = int(y_max) if isclose(y_max, int(y_max), rel_tol=1e-4) else ceil(y_max)
 
-            draw_triangle(*v1, *v2, *v3)
-            draw_line(*v1, *v2)
-            draw_line(*v2, *v3)
-            draw_line(*v3, *v1)
+            draw_triangle(*v1, *v2, *v3, island_index)
+            draw_line(*v1, *v2, island_index)
+            draw_line(*v2, *v3, island_index)
+            draw_line(*v3, *v1, island_index)
 
         # Create and save the image.
 
