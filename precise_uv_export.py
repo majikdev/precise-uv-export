@@ -22,13 +22,11 @@ class ExportLayout(bpy.types.Operator):
     bl_label = 'Export Precise Layout'
     bl_options = {'REGISTER', 'UNDO'}
 
-    # Export properties.
-
     filepath: StringProperty(subtype='FILE_PATH')
 
     check_existing: BoolProperty(default=True, options={'HIDDEN'})
 
-    size: IntVectorProperty(size=2, min=2, max=4096, default=(16, 16), name='Image Size',
+    size: IntVectorProperty(size=2, min=2, max=8192, default=(16, 16), name='Image Size',
                             description='Dimensions of the exported layout image')
 
     shade_islands: BoolProperty(default=True, name='Shade Islands',
@@ -69,18 +67,17 @@ class ExportLayout(bpy.types.Operator):
         meshes = list(self.get_meshes(context))
         triangles = list(self.get_triangles(meshes))
 
-        self.export_uv_layout(path, triangles)
+        self.draw_layout(triangles)
+        self.save_layout(path)
 
         if editing:
             bpy.ops.object.mode_set(mode='EDIT')
 
         return {'FINISHED'}
 
-    def export_uv_layout(self, path, triangles):
+    def draw_layout(self, triangles):
         self.width, self.height = self.size
         self.indices = [-1] * (self.width * self.height)
-
-        # Draw triangles.
 
         for triangle in triangles:
             index = triangle.pop()
@@ -89,18 +86,17 @@ class ExportLayout(bpy.types.Operator):
             x_min, x_max = max(min(v1[0], v2[0], v3[0]), 0), min(max(v1[0], v2[0], v3[0]), self.width)
             y_min, y_max = max(min(v1[1], v2[1], v3[1]), 0), min(max(v1[1], v2[1], v3[1]), self.height)
 
-            self.x_min = ceil(x_min) if isclose(x_min, ceil(x_min), rel_tol=1e-4) else int(x_min)
-            self.y_min = ceil(y_min) if isclose(y_min, ceil(y_min), rel_tol=1e-4) else int(y_min)
-            self.x_max = int(x_max) if isclose(x_max, int(x_max), rel_tol=1e-4) else ceil(x_max)
-            self.y_max = int(y_max) if isclose(y_max, int(y_max), rel_tol=1e-4) else ceil(y_max)
+            x_min = ceil(x_min) if isclose(x_min, ceil(x_min), rel_tol=1e-4) else int(x_min)
+            y_min = ceil(y_min) if isclose(y_min, ceil(y_min), rel_tol=1e-4) else int(y_min)
+            x_max = int(x_max) if isclose(x_max, int(x_max), rel_tol=1e-4) else ceil(x_max)
+            y_max = int(y_max) if isclose(y_max, int(y_max), rel_tol=1e-4) else ceil(y_max)
 
-            self.draw_triangle(*v1, *v2, *v3, index)
-            self.draw_line(*v1, *v2, index)
-            self.draw_line(*v2, *v3, index)
-            self.draw_line(*v3, *v1, index)
+            self.draw_triangle(*v1, *v2, *v3, x_min, x_max, y_min, y_max, index)
+            self.draw_line(*v1, *v2, x_min, x_max, y_min, y_max, index)
+            self.draw_line(*v2, *v3, x_min, x_max, y_min, y_max, index)
+            self.draw_line(*v3, *v1, x_min, x_max, y_min, y_max, index)
 
-        # Save the image.
-
+    def save_layout(self, path):
         pixels = [i for y in range(self.height) for x in range(self.width) for i in self.get_colour(x, y)]
 
         try:
@@ -113,9 +109,9 @@ class ExportLayout(bpy.types.Operator):
         except:
             pass
 
-    def draw_triangle(self, x1, y1, x2, y2, x3, y3, index):
-        for x in range(self.x_min, self.x_max):
-            for y in range(self.y_min, self.y_max):
+    def draw_triangle(self, x1, y1, x2, y2, x3, y3, x_min, x_max, y_min, y_max, index):
+        for x in range(x_min, x_max):
+            for y in range(y_min, y_max):
                 dist_a = (x - x2) * (y1 - y2) - (x1 - x2) * (y - y2)
                 dist_b = (x - x3) * (y2 - y3) - (x2 - x3) * (y - y3)
                 dist_c = (x - x1) * (y3 - y1) - (x3 - x1) * (y - y1)
@@ -126,7 +122,7 @@ class ExportLayout(bpy.types.Operator):
                 if not (negative and positive):
                     self.indices[y * self.width + x] = index
 
-    def draw_line(self, x1, y1, x2, y2, index):
+    def draw_line(self, x1, y1, x2, y2, x_min, x_max, y_min, y_max, index):
         length = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
         x_dir, y_dir = (x2 - x1) / length, (y2 - y1) / length
         x, y, dist = int(x1), int(y1), 0
@@ -149,7 +145,7 @@ class ExportLayout(bpy.types.Operator):
             y_dist = (y - y1 + 1) * y_delta
 
         while dist < length:
-            if self.x_min <= x < self.x_max and self.y_min <= y < self.y_max:
+            if x_min <= x < x_max and y_min <= y < y_max:
                 self.indices[y * self.width + x] = index
 
             if x_dist < y_dist:
@@ -176,22 +172,10 @@ class ExportLayout(bpy.types.Operator):
             return value, value, value, 1
 
         if self.outline_islands:
-            has_l = x > 0
-            has_r = x < self.width - 1
-            has_t = y > 0
-            has_b = y < self.height - 1
-
-            neighbours  = has_l and self.indices[y * self.width + (x - 1)] >= 0
-            neighbours += has_r and self.indices[y * self.width + (x + 1)] >= 0
-            neighbours += has_t and self.indices[(y - 1) * self.width + x] >= 0
-            neighbours += has_b and self.indices[(y + 1) * self.width + x] >= 0
-            neighbours += has_l and has_t and self.indices[(y - 1) * self.width + (x - 1)] >= 0
-            neighbours += has_r and has_t and self.indices[(y - 1) * self.width + (x + 1)] >= 0
-            neighbours += has_l and has_b and self.indices[(y + 1) * self.width + (x - 1)] >= 0
-            neighbours += has_r and has_b and self.indices[(y + 1) * self.width + (x + 1)] >= 0
-
-            if neighbours > 0:
-                return 0, 0, 0, 1
+            for y_neighbour in range(max(y - 1, 0), min(y + 2, self.height)):
+                for x_neighbour in range(max(x - 1, 0), min(x + 2, self.width)):
+                    if self.indices[y_neighbour * self.width + x_neighbour] != -1:
+                        return 0, 0, 0, 1
 
         return 0, 0, 0, 0
 
